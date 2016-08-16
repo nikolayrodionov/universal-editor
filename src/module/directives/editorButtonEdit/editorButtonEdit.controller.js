@@ -56,7 +56,9 @@
             if ($location.search().parent) {
                 stateParams.parent = $location.search().parent;
             }
-
+            if(!!$location.search().lang){
+                stateParams.lang = $location.search().lang;
+            }
             $state.go('editor.type.entity',stateParams, stateOptions);
         });
     }

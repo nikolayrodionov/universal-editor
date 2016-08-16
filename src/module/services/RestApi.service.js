@@ -20,13 +20,22 @@
         self.methodType = "";
         self.editedEntityId = null;
 
-        $rootScope.$on('editor:set_entity_type', function (event,type) {
+        $rootScope.$on('editor:set_entity_type', function (event,type, lang) {
             filterParams = undefined;
             entityType = type;
             itemsKey = "items";
-            entityObject = configData.entities.filter(function (item) {
-                return item.name === entityType;
-            })[0];
+            var entityObjects = configData.entities.filter(function (item) {
+                return (item.name === entityType);
+            });
+            if(entityObjects.length > 1) {
+                entityObjects.forEach(function (item) {
+                    if (item.lang === lang) {
+                        entityObject = item;
+                    }
+                });
+            } else{
+                entityObject = entityObjects[0];
+            }
             mixEntity = self.getMixModeByEntity();
             if (angular.isDefined(entityObject.backend.keys)) {
                 itemsKey = entityObject.backend.keys.items || itemsKey;
@@ -94,13 +103,16 @@
             if(self.isProcessing){
                 return;
             }
-
             if($location.search().hasOwnProperty("parent")){
                 var filterObject = {};
                 filterObject[entityObject.backend.fields.parent] = $location.search().parent;
                 angular.extend(params,{filter : JSON.stringify(filterObject)});
             }
-
+            //if($location.search().hasOwnProperty("lang")){
+             //   var filterObject = {};
+             //   filterObject[entityObject.backend.fields.parent] = $location.search().parent;
+             //   angular.extend(params,{filter : JSON.stringify(filterObject)});
+            //}
             if(filterParams){
                 if(params.hasOwnProperty("filter")){
                     var tempFilter = JSON.parse(params.filter);
@@ -402,9 +414,11 @@
                         $rootScope.$broadcast("editor:presave_entity_updated","");
                         break;
                     case "Created":
-                        $state.go('editor.type.entity',{
-                            uid : response.data[idField]
-                        },{
+                        var stateParams = {uid : response.data[idField]};
+                        if(!!$location.search().lang){
+                            stateParams.lang = $location.search().lang;
+                        }
+                        $state.go('editor.type.entity',stateParams,{
                             notify : false
                         });
                         $rootScope.$broadcast("editor:presave_entity_created",response.data[idField]);
@@ -620,11 +634,20 @@
             }
         };
 
-        this.setEntityType = function (type) {
+        this.setEntityType = function (type, lang) {
             entityType = type;
-            entityObject = configData.entities.filter(function (item) {
-                return item.name === entityType;
-            })[0];
+            var entityObjects = configData.entities.filter(function (item) {
+                return (item.name === entityType);
+            });
+            if(entityObjects.length > 1) {
+                entityObjects.forEach(function (item) {
+                    if (item.lang === lang) {
+                        entityObject = item;
+                    }
+                });
+            } else{
+                entityObject = entityObjects[0];
+            }
             mixEntity = self.getMixModeByEntity();
         };
 

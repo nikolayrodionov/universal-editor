@@ -3,6 +3,7 @@
     {
       "name": "staff",
       "label": "Сотрудники",
+      "lang": "ru",
       "backend": {
         "url": "http://universal-backend.dev/rest/v1/staff",
         "sortBy": "-id",
@@ -137,8 +138,9 @@
       ]
     },
     {
-      "name": "news",
+      "name": "staff",
       "label": "Новости",
+      "lang": "en",
       "backend": {
         "url": "http://universal-backend.dev/rest/v1/news",
         "sortBy": "-id",
@@ -204,6 +206,95 @@
               "name": "text",
               "type": "wysiwyg",
               "label": "Текст"
+            }
+          ]
+        },
+        {
+          "label": "Место",
+          "fields": [
+            {
+              "name": "coordinates",
+              "type": "map",
+              "label": "Местоположение события"
+            }
+          ]
+        },
+        {
+          "label": "Служебное",
+          "fields": [
+            {
+              "name": "created_at",
+              "type": "datetime",
+              "readonly": true,
+              "label": "Дата создания"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime",
+              "readonly": true,
+              "label": "Дата обновления"
+            }
+          ]
+        }
+      ],
+      "contextMenu": [
+        {
+          "label": "Раскрыть",
+          "type": "open"
+        },
+        {
+          "label": "Редактировать",
+          "type": "edit"
+        },
+        {
+          "label": "Удалить",
+          "type": "delete"
+        }
+      ],
+      "listHeaderBar": [
+        {
+          "type": "create",
+          "label": "Создать"
+        }
+      ],
+      "editFooterBar": [
+        {
+          "type": "update",
+          "label": "Сохранить"
+        },
+        {
+          "type": "presave",
+          "label": "Применить"
+        },
+        {
+          "type": "delete",
+          "label": "Удалить"
+        }
+      ]
+    },
+    {
+      "name": "news123",
+      "label": "Новости123",
+      "backend": {
+        "url": "http://universal-backend.dev/rest/v1/news",
+        "sortBy": "-id",
+        "fields": {
+          "primaryKey": "id",
+          "parent": "parent_id"
+        }
+      },
+      "tabs": [
+        {
+          "label": "Новость",
+          "fields": [
+            {
+              "name": "published",
+              "type": "checkbox",
+              "list": true,
+              "label": "Опубликовано",
+              "values": {
+                "1": ""
+              }
             }
           ]
         },

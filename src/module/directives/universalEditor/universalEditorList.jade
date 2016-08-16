@@ -1,6 +1,6 @@
 ul.nav.nav-tabs(data-ng-if="vm.configData.entities.length > 1")
    li.item(data-ng-repeat="entityItem in vm.configData.entities track by $index", data-ng-class="(entityItem.name === entity) ? 'active' : ''")
-      a(href="#/editor/{{entityItem.name}}/list") {{entityItem.label}}
+      a(href="#/{{entityItem.name}}/list{{!!entityItem.lang ? '?lang='+ vm.lang : ''}}") {{entityItem.label}}
 .universal-editor
    div
       .editor-header
@@ -16,6 +16,13 @@ ul.nav.nav-tabs(data-ng-if="vm.configData.entities.length > 1")
             div.btn.btn-lg.btn-success(data-ng-if="button.type == 'request'", data-ng-click="vm.contextAction(button)") {{button.label}}
             div(data-ng-if="button.type == 'targetBlank'", data-editor-button-target-blank="", data-item-value="item", data-button-label="{{button.label}}", data-button-request="{{button.request}}", data-index="{{$index}}", data-button-class="header")
             div(data-ng-if="button.type == 'download'", data-editor-button-download="", data-item-value="item", data-button-label="{{button.label}}", data-button-request="{{button.request}}", data-index="{{$index}}", data-button-class="header")
+         //.form-group.select-language
+         select(
+            data-ng-options="lang for lang in vm.langs",
+            data-ng-model="vm.langSelect",
+            data-ng-change="vm.setLanguageList()",
+            data-ng-if="vm.langs.length"
+            )
       .editor-filter(data-ng-hide="vm.visibleFilter || (vm.entityLoaded || vm.loadingData)")
          .editor-filter-wrapper(ng-keyup="vm.clickEnter($event)")
             div(data-ng-repeat="filter in vm.filterFields", data-filter-wrapper="", data-filter-name="{{filter.name}}")

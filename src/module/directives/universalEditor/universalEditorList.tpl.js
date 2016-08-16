@@ -8,7 +8,7 @@ module.run(['$templateCache', function($templateCache) {
   $templateCache.put('module/directives/universalEditor/universalEditorList.html',
     '\n' +
     '<ul data-ng-if="vm.configData.entities.length &gt; 1" class="nav nav-tabs">\n' +
-    '    <li data-ng-repeat="entityItem in vm.configData.entities track by $index" data-ng-class="(entityItem.name === entity) ? \'active\' : \'\'" class="item"><a href="#/editor/{{entityItem.name}}/list">{{entityItem.label}}</a></li>\n' +
+    '    <li data-ng-repeat="entityItem in vm.configData.entities track by $index" data-ng-class="(entityItem.name === entity) ? \'active\' : \'\'" class="item"><a href="#/{{entityItem.name}}/list{{!!entityItem.lang ? \'?lang=\'+ vm.lang : \'\'}}">{{entityItem.label}}</a></li>\n' +
     '</ul>\n' +
     '<div class="universal-editor">\n' +
     '    <div>\n' +
@@ -26,6 +26,8 @@ module.run(['$templateCache', function($templateCache) {
     '                <div data-ng-if="button.type == \'targetBlank\'" data-editor-button-target-blank="" data-item-value="item" data-button-label="{{button.label}}" data-button-request="{{button.request}}" data-index="{{$index}}" data-button-class="header"></div>\n' +
     '                <div data-ng-if="button.type == \'download\'" data-editor-button-download="" data-item-value="item" data-button-label="{{button.label}}" data-button-request="{{button.request}}" data-index="{{$index}}" data-button-class="header"></div>\n' +
     '            </div>\n' +
+    '            <!--.form-group.select-language-->\n' +
+    '            <select data-ng-options="lang for lang in vm.langs" data-ng-model="vm.langSelect" data-ng-change="vm.setLanguageList()" data-ng-if="vm.langs.length"></select>\n' +
     '        </div>\n' +
     '        <div data-ng-hide="vm.visibleFilter || (vm.entityLoaded || vm.loadingData)" class="editor-filter">\n' +
     '            <div ng-keyup="vm.clickEnter($event)" class="editor-filter-wrapper">\n' +

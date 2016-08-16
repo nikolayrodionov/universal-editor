@@ -21,10 +21,15 @@
         vm.assetsPath = '../assets';
 
         if ($scope.entity === undefined || angular.isUndefined(entityObject)){
-            console.error("Editor: Сущность с типом \"" + $scope.entity + "\" не описана в конфигурационном файле");
+            console.error('Editor: Сущность с типом "' + $scope.entity + '" не описана в конфигурационном файле');
             return;
         }
-        vm.configData = configData;
+
+        vm.lang = $location.search().lang;
+        vm.langSelect = vm.lang;
+        vm.configData = {};
+        vm.configData.entities = [];
+        vm.langs = [];
         vm.correctEntityType = true;
         vm.entityLoaded = false;
         vm.listLoaded = false;
@@ -37,9 +42,9 @@
         vm.notifys = [];
         vm.tabsVisibility = [];
         vm.currentTab = vm.tabs[0].label;
-        vm.entityId = "";
-        vm.editorEntityType = "new";
-        vm.sortField = "";
+        vm.entityId = '';
+        vm.editorEntityType = 'new';
+        vm.sortField = '';
         vm.sortingDirection = true;
         vm.pageItemsArray = [];
         vm.contextLinks = entityObject.contextMenu;
@@ -55,13 +60,23 @@
         vm.autoCompleteFields = [];
         vm.entityType = $scope.entity;
 
+        configData.entities.forEach(function(entity){
+            if(!entity.hasOwnProperty('lang') || (entity.lang === vm.lang)){
+                vm.configData.entities.push(entity);
+            }
+            if(entity.hasOwnProperty('lang') && (entity.name === vm.entityType)){
+                vm.langs.push(entity.lang);
+            }
+        });
+
         if(entityObject.backend.hasOwnProperty('fields')){
             vm.idField = entityObject.backend.fields.primaryKey || vm.idField;
         }
 
         var mixEntity = RestApiService.getMixModeByEntity();
+
         if(mixEntity.existence){
-            vm.subType = mixEntity.entityTypeName || "type";
+            vm.subType = mixEntity.entityTypeName || 'type';
             vm.mixEntityType = mixEntity.entity;
             mixEntityObject = configData.entities.filter(function (item) {
                 return item.name === vm.mixEntityType;
@@ -70,8 +85,8 @@
             vm.mixContextLinks = mixEntityObject.contextMenu;
         }
         vm.metaKey = false;
-        metaKey = "_meta";
-        itemsKey = "items";
+        metaKey = '_meta';
+        itemsKey = 'items';
 
         angular.forEach(entityObject.tabs, function (tab) {
             angular.forEach(tab.fields, function (field) {
@@ -117,7 +132,6 @@
                     break;
             }
         });
-
         if(mixEntity.existence){
           angular.forEach(mixEntityObject.tabs, function (tab) {
               angular.forEach(tab.fields, function (field) {
@@ -132,7 +146,6 @@
         }
 
         vm.sortField = entityObject.backend.sortBy || vm.tableFields[0].field;
-
         angular.forEach(vm.tabs, function (tab,ind) {
             if(tab.fields.length > 0){
                 vm.tabsVisibility.push(tab.fields[0].name);
@@ -247,7 +260,7 @@
             sort : vm.sortingDirection ? vm.sortField : "-" + vm.sortField
         });
 
-        $rootScope.$broadcast('editor:set_entity_type',$scope.entity);
+        $rootScope.$broadcast('editor:set_entity_type',$scope.entity, vm.lang);
 
 
         $scope.$on('editor:items_list', function (event, data) {
@@ -510,6 +523,20 @@
             if(event.keyCode === 13){
                 vm.applyFilter();
             }
-        }
+        };
+
+        vm.setLanguageList = function(){
+            $state.go('editor.type.list',{
+                lang: vm.langSelect
+            },{reload: true});
+        };
+
+        vm.setLanguageForm = function(){
+            if(vm.editorEntityType ==='new'){
+                $state.go('editor.type.new',{
+                    lang: vm.langSelect
+                },{reload: true});
+            }
+        };
     }
 })();

@@ -8,7 +8,7 @@ module.run(['$templateCache', function($templateCache) {
   $templateCache.put('module/directives/universalEditor/universalEditorForm.html',
     '\n' +
     '<ul data-ng-if="vm.configData.entities.length &gt; 1" class="nav nav-tabs">\n' +
-    '    <li data-ng-repeat="entityItem in vm.configData.entities track by $index" data-ng-class="(entityItem.name === entity) ? \'active\' : \'\'" class="item"><a href="#/editor/{{entityItem.name}}/list">{{entityItem.label}}</a></li>\n' +
+    '    <li data-ng-repeat="entityItem in vm.configData.entities track by $index" data-ng-class="(entityItem.name === entity) ? \'active\' : \'\'" class="item"><a href="#/{{entityItem.name}}/list{{!!entityItem.lang ? \'?lang=\'+ vm.lang : \'\'}}">{{entityItem.label}}</a></li>\n' +
     '</ul>\n' +
     '<div class="universal-editor">\n' +
     '    <div>\n' +
@@ -16,6 +16,7 @@ module.run(['$templateCache', function($templateCache) {
     '            <div data-ng-click="vm.closeButton()" ng-style="{\'background-image\':\'url(\'+ vm.assetsPath +\'/images/close.jpg)\'}" class="close-editor"></div>\n' +
     '            <div class="nav nav-tabs">\n' +
     '                <li data-ng-repeat="(tkey,tab) in vm.tabs" data-ng-class="vm.currentTab == tab.label ? \'active\' : \'\'" data-ng-click="vm.currentTab = tab.label"><a href="">{{tab.label}}</a></li>\n' +
+    '                <select data-ng-options="lang for lang in vm.langs" data-ng-model="vm.langSelect" data-ng-change="vm.setLanguageForm()" data-ng-if="vm.langs.length"></select>\n' +
     '            </div>\n' +
     '            <div class="tab-content-wrapper">\n' +
     '                <div data-ng-repeat="(tkey,tab) in vm.tabs" data-ng-show="vm.currentTab == tab.label" class="tab-item-content">\n' +

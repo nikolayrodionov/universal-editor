@@ -161,12 +161,11 @@
 
         var defaultRoute = ConfigDataProviderProvider.getDefaultEntity();
 
-        $urlRouterProvider.otherwise("/editor/" + defaultRoute +"/list");
+        $urlRouterProvider.otherwise("/" + defaultRoute +"/list?lang=ru");
 
         $stateProvider
             .state('editor',{
-                url : "/editor",
-                template : "<div data-ui-view></div>",
+                template : "<div data-ui-view></div>"
             })
             .state('editor.type',{
                 url : "/:type",
@@ -177,27 +176,30 @@
                 controller : "UniversalEditorController",
                 controllerAs : "vm",
                 onEnter : ["RestApiService", "$stateParams", function (RestApiService,$stateParams) {
-                    RestApiService.setEntityType($stateParams.type);
+                    //RestApiService.setEntityType($stateParams.type);
                 }]
             })
             .state('editor.type.list',{
-                url : "/list?parent",
+                url : "/list?parent&lang",
                 templateUrl : "module/directives/universalEditor/universalEditorList.html",
-                onEnter : ["RestApiService", function (RestApiService) {
+                onEnter : ["RestApiService", "$stateParams", function (RestApiService, $stateParams) {
+                    RestApiService.setEntityType($stateParams.type, $stateParams.lang);
                     RestApiService.getItemsList();
                 }]
             })
             .state('editor.type.new',{
-                url : '/new?parent&type',
+                url : '/new?parent&type&lang',
                 templateUrl : "module/directives/universalEditor/universalEditorForm.html",
-                onEnter : ["EditEntityStorage", function (EditEntityStorage) {
+                onEnter : ["RestApiService","EditEntityStorage", "$stateParams",function (RestApiService, EditEntityStorage, $stateParams) {
+                    RestApiService.setEntityType($stateParams.type, $stateParams.lang);
                     EditEntityStorage.createNewEntity();
                 }]
             })
             .state('editor.type.entity',{
-                url : '/:uid?back&parent',
+                url : '/:uid?back&parent&lang',
                 templateUrl : "module/directives/universalEditor/universalEditorForm.html",
                 onEnter : ["RestApiService", "$rootScope", "$stateParams", function (RestApiService,$rootScope,$stateParams) {
+                    RestApiService.setEntityType($stateParams.type, $stateParams.lang);
                     RestApiService.getItemById($stateParams.uid);
                 }]
             });

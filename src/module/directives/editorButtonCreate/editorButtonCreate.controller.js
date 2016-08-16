@@ -22,10 +22,15 @@
             var newPageType = $scope.type || $state.params.type;
 
             EditEntityStorage.createNewEntity();
-            $state.go('editor.type.new',{
+            var params = {
                 parent: parentId,
                 type: newPageType
-            });
+            };
+
+            if(!!$location.search().lang){
+                params.lang = $location.search().lang;
+            }
+            $state.go('editor.type.new',params);
         });
     }
 })();
