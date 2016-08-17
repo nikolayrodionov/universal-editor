@@ -27,7 +27,7 @@
             }
         };
 
-        this.createNewEntity = function () {
+        this.createNewEntity = function (state, stateParams) {
 
             var entityObject = {};
             entityObject.editorEntityType = "new";
@@ -35,16 +35,21 @@
             angular.forEach(fieldControllers,function(fCtrl){
                 angular.merge(entityObject,fCtrl.getInitialValue());
             });
-
-            var search =  $location.search();       
-            var type = search.type || $state.params.type;     
-            if (search.hasOwnProperty("parent")) {
+            var search = (state ==='create') ? stateParams : $location.search();
+            var type = search.type || $state.params.type;
+            //переписать поиск поля
+            if (search.hasOwnProperty("parent") && search.parent) {
                 var entity_conf = configData.entities.filter(function (item) {
                     return item.name === type;
                 })[0];
                 entityObject[entity_conf.backend.fields.parent] = search.parent;
             }
-
+            if(search['if-not-exist'] === 'create'){
+                //написать поиск id
+                entityObject['id'] = search.uid;
+                entityObject['lang'] = search.lang;
+            }
+            //console.log(entityObject);
             $timeout(function () {
                 $rootScope.$broadcast("editor:entity_loaded",entityObject);
             },0);
@@ -52,6 +57,7 @@
 
         this.setSourceEntity = function (data) {
             data.editorEntityType = "exist";
+            console.log(data);
             $rootScope.$broadcast("editor:entity_loaded",data);
         };
 
@@ -124,7 +130,7 @@
             self.actionType = data;
         });
 
-        $rootScope.$on('editor:set_entity_type',function (event,type, lang) {
+        $rootScope.$on('editor:set_entity_type',function (event,type) {
             entityType = type;
             fieldControllers = [];
         });

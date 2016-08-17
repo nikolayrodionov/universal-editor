@@ -43,7 +43,7 @@
             });
         };
 
-        $rootScope.$on('editor:set_entity_type',function (event,type, lang) {
+        $rootScope.$on('editor:set_entity_type',function (event,type) {
             entityType = type;
             filterControllers = [];
         });

@@ -1,6 +1,6 @@
-ul.nav.nav-tabs(data-ng-if="vm.configData.entities.length > 1")
-   li.item(data-ng-repeat="entityItem in vm.configData.entities track by $index", data-ng-class="(entityItem.name === entity) ? 'active' : ''")
-      a(href="#/{{entityItem.name}}/list{{!!entityItem.lang ? '?lang='+ vm.lang : ''}}") {{entityItem.label}}
+ul.nav.nav-tabs(data-ng-if="vm.menu.length > 1")
+   li.item(data-ng-repeat="itemMenu in vm.menu track by $index", data-ng-class="(itemMenu.name === entity) ? 'active' : ''")
+      a(href="{{itemMenu.href}}") {{itemMenu.label}}
 .universal-editor
    div
       .editor-header

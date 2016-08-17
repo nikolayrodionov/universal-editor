@@ -159,12 +159,15 @@
 
         /* ROUTES */
 
-        var defaultRoute = ConfigDataProviderProvider.getDefaultEntity();
+        var defaultRoute = ConfigDataProviderProvider.getNameDefaultEntity();
 
-        $urlRouterProvider.otherwise("/" + defaultRoute +"/list?lang=ru");
+        var defaultLang = ConfigDataProviderProvider.getLangDefaultEntity();
+
+        $urlRouterProvider.otherwise("/editor/" + defaultRoute +"/list" + defaultLang);
 
         $stateProvider
             .state('editor',{
+                url : "/editor",
                 template : "<div data-ui-view></div>"
             })
             .state('editor.type',{
@@ -196,11 +199,15 @@
                 }]
             })
             .state('editor.type.entity',{
-                url : '/:uid?back&parent&lang',
+                url : '/:uid?back&parent&lang&if-not-exist',
                 templateUrl : "module/directives/universalEditor/universalEditorForm.html",
-                onEnter : ["RestApiService", "$rootScope", "$stateParams", function (RestApiService,$rootScope,$stateParams) {
+                onEnter : ["RestApiService","EditEntityStorage", "$rootScope", "$stateParams", function (RestApiService,EditEntityStorage, $rootScope,$stateParams) {
                     RestApiService.setEntityType($stateParams.type, $stateParams.lang);
-                    RestApiService.getItemById($stateParams.uid);
+                    if($stateParams['if-not-exist'] === 'create'){
+                        EditEntityStorage.createNewEntity('create', $stateParams);
+                    } else{
+                        RestApiService.getItemById($stateParams.uid);
+                    }
                 }]
             });
         /* DATE INPUT DECORATOR*/

@@ -14,16 +14,18 @@
             filterParams,
             itemsKey,
             entityObject,
-            mixEntity;
+            mixEntity,
+            multilanguage;
 
         self.isProcessing = false;
         self.methodType = "";
         self.editedEntityId = null;
 
-        $rootScope.$on('editor:set_entity_type', function (event,type, lang) {
+        $rootScope.$on('editor:set_entity_type', function (event,type) {
             filterParams = undefined;
             entityType = type;
             itemsKey = "items";
+            var lang = multilanguage[entityType].choose;
             var entityObjects = configData.entities.filter(function (item) {
                 return (item.name === entityType);
             });
@@ -36,6 +38,7 @@
             } else{
                 entityObject = entityObjects[0];
             }
+            multilanguage[entityType].label = entityObject.label;
             mixEntity = self.getMixModeByEntity();
             if (angular.isDefined(entityObject.backend.keys)) {
                 itemsKey = entityObject.backend.keys.items || itemsKey;
@@ -285,14 +288,15 @@
                 _method = typeof request.method !== 'undefined' ? request.method : _method;
                 _url = typeof request.url !== 'undefined' ? request.url : _url;
             }
+
             $http({
                 method : _method,
                 url : _url,
                 data : item,
                 params: params
             }).then(function (response) {
-                $rootScope.$broadcast("editor:presave_entity_created",response.data[idField]);
                 self.isProcessing = false;
+                $rootScope.$broadcast("editor:presave_entity_created",response.data[idField]);
                 $rootScope.$broadcast("uploader:remove_session");
                 $rootScope.$broadcast("editor:entity_success");
                 var params = {};
@@ -384,7 +388,7 @@
 
             self.isProcessing = true;
 
-            if(self.editedEntityId !== ""){
+            if(self.editedEntityId !== "" && !($location.search().hasOwnProperty('if-not-exist'))){
                 tmpUrl = entityObject.backend.url + "/" + self.editedEntityId;
             } else {
                 tmpUrl = entityObject.backend.url;
@@ -402,8 +406,9 @@
                 _method = typeof request.method !== 'undefined' ? request.method : _method;
                 _url = typeof request.url !== 'undefined' ? request.url : _url;
             }
+            console.log(_url);
             $http({
-                method : 'POST',
+                method : _method,
                 url : _url,
                 data : item,
                 params: params
@@ -465,16 +470,26 @@
             if (expandFields.length > 0){
                 qParams.expand = expandFields.join(',');
             }
-
             $http({
                 method : 'GET',
                 url : entityObject.backend.url + '/' + id,
                 params : qParams
             }).then(function (response) {
                 self.isProcessing = false;
+                //console.log(response);
                 EditEntityStorage.setSourceEntity(response.data);
             }, function (reject) {
                 self.isProcessing = false;
+                console.log('zhopa');
+                console.log($location.search());
+                if(reject.status === 404 && ($location.search()['if-not-exist'] === 'new')){
+                    $state.go('editor.type.entity', {
+                        type: entityType,
+                        lang: multilanguage[entityType].choose,
+                        uid: id,
+                        'if-not-exist': 'create'
+                    },{ reload: true });
+                }
             });
         };
 
@@ -639,6 +654,22 @@
             var entityObjects = configData.entities.filter(function (item) {
                 return (item.name === entityType);
             });
+            if(!multilanguage){
+                multilanguage = {};
+                configData.entities.forEach(function(item){
+                    if(multilanguage.hasOwnProperty(item.name)){
+                        multilanguage[item.name].langs.push(item.lang);
+                    } else{
+                        multilanguage[item.name] = {};
+                        multilanguage[item.name].langs = [];
+                        multilanguage[item.name].label = item.label;
+                        if(item.hasOwnProperty('lang')){
+                            multilanguage[item.name].langs.push(item.lang);
+                            multilanguage[item.name].choose = item.lang;
+                        }
+                    }
+                });
+            }
             if(entityObjects.length > 1) {
                 entityObjects.forEach(function (item) {
                     if (item.lang === lang) {
@@ -648,7 +679,13 @@
             } else{
                 entityObject = entityObjects[0];
             }
+            multilanguage[entityType].choose = lang;
+            multilanguage[entityType].label = entityObject.label;
             mixEntity = self.getMixModeByEntity();
+        };
+
+        this.getMultilanguage = function () {
+            return multilanguage;
         };
 
         this.getEntityType = function () {

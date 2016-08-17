@@ -24,12 +24,11 @@
             console.error('Editor: Сущность с типом "' + $scope.entity + '" не описана в конфигурационном файле');
             return;
         }
-
-        vm.lang = $location.search().lang;
+        vm.multilanguage = RestApiService.getMultilanguage();
+        vm.lang = vm.multilanguage[$scope.entity].choose;
         vm.langSelect = vm.lang;
-        vm.configData = {};
-        vm.configData.entities = [];
-        vm.langs = [];
+        vm.menu = [];
+        vm.langs = vm.multilanguage[$scope.entity].langs;
         vm.correctEntityType = true;
         vm.entityLoaded = false;
         vm.listLoaded = false;
@@ -60,14 +59,13 @@
         vm.autoCompleteFields = [];
         vm.entityType = $scope.entity;
 
-        configData.entities.forEach(function(entity){
-            if(!entity.hasOwnProperty('lang') || (entity.lang === vm.lang)){
-                vm.configData.entities.push(entity);
-            }
-            if(entity.hasOwnProperty('lang') && (entity.name === vm.entityType)){
-                vm.langs.push(entity.lang);
-            }
-        });
+        for(var key in vm.multilanguage){
+            var itemMenu = {};
+            itemMenu.name = key;
+            itemMenu.label = vm.multilanguage[key].label;
+            itemMenu.href = '#/editor/' + key + '/list' + (!!vm.multilanguage[key].langs.length ? ('?lang='+ vm.multilanguage[key].choose) : '' );
+            vm.menu.push(itemMenu);
+        }
 
         if(entityObject.backend.hasOwnProperty('fields')){
             vm.idField = entityObject.backend.fields.primaryKey || vm.idField;
@@ -190,6 +188,9 @@
                 params.parent = $state.params.parent;
                 isReload = false;
             }
+            if(!!vm.langSelect){
+                params.lang = vm.langSelect;
+            }
             $state.go('editor.type.list', params, {reload: isReload});
 
         };
@@ -260,7 +261,7 @@
             sort : vm.sortingDirection ? vm.sortField : "-" + vm.sortField
         });
 
-        $rootScope.$broadcast('editor:set_entity_type',$scope.entity, vm.lang);
+        $rootScope.$broadcast('editor:set_entity_type',$scope.entity);
 
 
         $scope.$on('editor:items_list', function (event, data) {
@@ -535,6 +536,11 @@
             if(vm.editorEntityType ==='new'){
                 $state.go('editor.type.new',{
                     lang: vm.langSelect
+                },{reload: true});
+            } else if(vm.editorEntityType === 'exist'){
+                $state.go('editor.type.entity',{
+                    lang: vm.langSelect,
+                    'if-not-exist': 'new'
                 },{reload: true});
             }
         };

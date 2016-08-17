@@ -7,8 +7,8 @@ try {
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('module/directives/universalEditor/universalEditorForm.html',
     '\n' +
-    '<ul data-ng-if="vm.configData.entities.length &gt; 1" class="nav nav-tabs">\n' +
-    '    <li data-ng-repeat="entityItem in vm.configData.entities track by $index" data-ng-class="(entityItem.name === entity) ? \'active\' : \'\'" class="item"><a href="#/{{entityItem.name}}/list{{!!entityItem.lang ? \'?lang=\'+ vm.lang : \'\'}}">{{entityItem.label}}</a></li>\n' +
+    '<ul data-ng-if="vm.menu.length &gt; 1" class="nav nav-tabs">\n' +
+    '    <li data-ng-repeat="itemMenu in vm.menu track by $index" data-ng-class="(itemMenu.name === entity) ? \'active\' : \'\'" class="item"><a href="{{itemMenu.href}}">{{itemMenu.label}}</a></li>\n' +
     '</ul>\n' +
     '<div class="universal-editor">\n' +
     '    <div>\n' +
