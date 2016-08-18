@@ -26,8 +26,8 @@
         }
         vm.multilanguage = RestApiService.getMultilanguage();
         vm.lang = vm.multilanguage[$scope.entity].choose;
-        vm.langSelect = vm.lang;
         vm.menu = [];
+        vm.menuLangList = [];
         vm.langs = vm.multilanguage[$scope.entity].langs;
         vm.correctEntityType = true;
         vm.entityLoaded = false;
@@ -51,6 +51,7 @@
         vm.editFooterBarNew = [];
         vm.editFooterBarExist = [];
         vm.contextId = undefined;
+        vm.isDropdownForm = true;
         vm.idField = 'id';
         vm.parentButton = false;
         vm.filterFields = [];
@@ -67,6 +68,13 @@
             vm.menu.push(itemMenu);
         }
 
+        vm.multilanguage[$scope.entity].langs.forEach(function(item){
+            var itemMenuLangList = {};
+            itemMenuLangList.label = item;
+            itemMenuLangList.href = '#/editor/' + $scope.entity + '/list?lang='+ item;
+            vm.menuLangList.push(itemMenuLangList);
+        });
+
         if(entityObject.backend.hasOwnProperty('fields')){
             vm.idField = entityObject.backend.fields.primaryKey || vm.idField;
         }
@@ -76,9 +84,18 @@
         if(mixEntity.existence){
             vm.subType = mixEntity.entityTypeName || 'type';
             vm.mixEntityType = mixEntity.entity;
-            mixEntityObject = configData.entities.filter(function (item) {
+            var mixEntityObjects = configData.entities.filter(function (item) {
                 return item.name === vm.mixEntityType;
             })[0];
+            if(mixEntityObjects.length > 1) {
+                mixEntityObjects.forEach(function (item) {
+                    if (item.lang === vm.lang) {
+                        mixEntityObject = item;
+                    }
+                });
+            } else{
+                mixEntityObject = mixEntityObjects[0];
+            }
             vm.mixedListHeaderBar = mixEntityObject.listHeaderBar;
             vm.mixContextLinks = mixEntityObject.contextMenu;
         }
@@ -431,6 +448,7 @@
             vm.editorEntityType = data.editorEntityType;
             vm.entityId = data[vm.idField];
             vm.entityLoaded = true;
+            setIsDropdownForm();
         });
 
         $scope.$on('editor:server_error', function (event,data) {
@@ -443,6 +461,7 @@
             });
             vm.entityId = data;
             vm.editorEntityType = "exist";
+            setIsDropdownForm();
         });
 
         $scope.$on('editor:presave_entity_updated', function (event,data) {
@@ -526,23 +545,14 @@
             }
         };
 
-        vm.setLanguageList = function(){
-            $state.go('editor.type.list',{
-                lang: vm.langSelect
-            },{reload: true});
-        };
-
-        vm.setLanguageForm = function(){
-            if(vm.editorEntityType ==='new'){
-                $state.go('editor.type.new',{
-                    lang: vm.langSelect
-                },{reload: true});
-            } else if(vm.editorEntityType === 'exist'){
-                $state.go('editor.type.entity',{
-                    lang: vm.langSelect,
-                    'if-not-exist': 'new'
-                },{reload: true});
+        function setIsDropdownForm(){
+            if(vm.editorEntityType === "exist"){
+                vm.isDropdownForm = false;
+            }else if(vm.editorEntityType === "new" && $location.search()['if-not-exist'] === 'create'){
+                vm.isDropdownForm = false;
+            }else{
+                vm.isDropdownForm = true;
             }
-        };
+        }
     }
 })();

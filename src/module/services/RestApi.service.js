@@ -111,11 +111,7 @@
                 filterObject[entityObject.backend.fields.parent] = $location.search().parent;
                 angular.extend(params,{filter : JSON.stringify(filterObject)});
             }
-            //if($location.search().hasOwnProperty("lang")){
-             //   var filterObject = {};
-             //   filterObject[entityObject.backend.fields.parent] = $location.search().parent;
-             //   angular.extend(params,{filter : JSON.stringify(filterObject)});
-            //}
+
             if(filterParams){
                 if(params.hasOwnProperty("filter")){
                     var tempFilter = JSON.parse(params.filter);
@@ -153,9 +149,6 @@
                 delete params.root;
             }
 
-            //if(Object.keys(params).length === 0){
-            //   params = undefined;
-            // }
 
             self.isProcessing = true;
 
@@ -178,10 +171,8 @@
                 params : params
             }).then(function (response) {
                 self.isProcessing = false;
-                //console.log("response list record:");
-                //console.log(response);
                 if(response.data[itemsKey].length === 0){
-                    $rootScope.$broadcast("editor:parent_empty");
+                    $rootScope.$broadcast('editor:parent_empty');
                     $rootScope.$broadcast('editor:items_list',response.data);
                     deferred.resolve();
                 } else {
@@ -236,7 +227,7 @@
 
             $http({
                 method : 'GET',
-                url : entityObject.backend.url + '?' + params,
+                url : entityObject.backend.url + '?' + params
             }).then(function (response) {
                 self.isProcessing = false;
                 $rootScope.$broadcast('editor:items_list',response.data);
@@ -278,11 +269,16 @@
             var _method = 'POST';
             var _url = entityObject.backend.url;
             var idField = 'id';
+            var lang = 'lang';
 
             if(entityObject.backend.hasOwnProperty('fields')){
-                idField = entityObject.backend.fields.primaryKey || idField;
+                idField = !!entityObject.backend.fields.primaryKey ? entityObject.backend.fields.primaryKey : idField;
+                lang = !!entityObject.backend.fields.language ? entityObject.backend.fields.language : lang;
             }
-
+            if($location.search()['if-not-exist'] === 'create'){
+                item[lang] = multilanguage[entityType].choose;
+                item[idField] = $location.search().uid;
+            }
             if(typeof request !== 'undefined'){
                 params = typeof request.params !== 'undefined' ? request.params : params;
                 _method = typeof request.method !== 'undefined' ? request.method : _method;
@@ -302,6 +298,9 @@
                 var params = {};
                 if ($location.search().parent) {
                     params.parent = $location.search().parent;
+                }
+                if ($location.search().lang) {
+                    params.lang = $location.search().lang;
                 }
                 $state.go('editor.type.list', params,{reload: true});
             }, function (reject) {
@@ -334,7 +333,7 @@
             self.isProcessing = true;
 
             var params = {};
-            var _method = 'PUT';
+            var _method = 'POST';
             var _url = entityObject.backend.url + "/" + self.editedEntityId;
 
             if(typeof request !== 'undefined'){
@@ -358,6 +357,9 @@
                 }
                 if($state.params.back){
                     params.type = $state.params.back;
+                }
+                if ($location.search().lang) {
+                    params.lang = $location.search().lang;
                 }
                 $state.go('editor.type.list', params, { reload: true });                   
             }, function (reject) {
@@ -387,26 +389,31 @@
             }
 
             self.isProcessing = true;
+            var idField = 'id';
+            var lang = 'lang';
+            if(entityObject.backend.hasOwnProperty('fields')){
+                idField = !!entityObject.backend.fields.primaryKey ? entityObject.backend.fields.primaryKey : idField;
+                lang = !!entityObject.backend.fields.language ? entityObject.backend.fields.language : lang;
+            }
 
             if(self.editedEntityId !== "" && !($location.search().hasOwnProperty('if-not-exist'))){
                 tmpUrl = entityObject.backend.url + "/" + self.editedEntityId;
             } else {
                 tmpUrl = entityObject.backend.url;
+                item[lang] = multilanguage[entityType].choose;
+                item[idField] = self.editedEntityId;
             }
+
             var params = {};
             var _method = 'POST';
             var _url = tmpUrl;
-            var idField = 'id';
 
-            if(entityObject.backend.hasOwnProperty('fields')){
-                idField = entityObject.backend.fields.primaryKey || idField;
-            }
             if(typeof request !== 'undefined'){
                 params = typeof request.params !== 'undefined' ? request.params : params;
                 _method = typeof request.method !== 'undefined' ? request.method : _method;
                 _url = typeof request.url !== 'undefined' ? request.url : _url;
             }
-            console.log(_url);
+
             $http({
                 method : _method,
                 url : _url,
@@ -476,19 +483,13 @@
                 params : qParams
             }).then(function (response) {
                 self.isProcessing = false;
-                //console.log(response);
                 EditEntityStorage.setSourceEntity(response.data);
             }, function (reject) {
                 self.isProcessing = false;
-                console.log('zhopa');
-                console.log($location.search());
-                if(reject.status === 404 && ($location.search()['if-not-exist'] === 'new')){
-                    $state.go('editor.type.entity', {
-                        type: entityType,
-                        lang: multilanguage[entityType].choose,
-                        uid: id,
-                        'if-not-exist': 'create'
-                    },{ reload: true });
+                if(reject.status === 404 && ($location.search()['if-not-exist'] === 'create')){
+                    var params = $location.search();
+                    angular.merge(params, { 'uid': id});
+                    EditEntityStorage.createNewEntity(params);
                 }
             });
         };
@@ -525,6 +526,9 @@
                 }
                 if($state.params.back){
                     params.type = $state.params.back;
+                }
+                if ($location.search().lang) {
+                    params.lang = $location.search().lang;
                 }
                 $state.go('editor.type.list', params, { reload: true });   
             }, function (reject) {

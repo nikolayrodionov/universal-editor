@@ -5,9 +5,9 @@
         .module('universal.editor')
         .service('EditEntityStorage',EditEntityStorage);
 
-    EditEntityStorage.$inject = ['$rootScope','$timeout','configData','$location', "$state"];
+    EditEntityStorage.$inject = ['$rootScope','$timeout','configData','$location', '$state', '$stateParams'];
 
-    function EditEntityStorage($rootScope,$timeout,configData,$location, $state){
+    function EditEntityStorage($rootScope,$timeout,configData,$location, $state, $stateParams){
         var sourceEntity,
             configuredFields = {},
             fieldControllers = [],
@@ -27,29 +27,45 @@
             }
         };
 
-        this.createNewEntity = function (state, stateParams) {
-
+        this.createNewEntity = function (params) {
             var entityObject = {};
             entityObject.editorEntityType = "new";
-            var configObjectEntity = self.getEntity();
+
             angular.forEach(fieldControllers,function(fCtrl){
                 angular.merge(entityObject,fCtrl.getInitialValue());
             });
-            var search = (state ==='create') ? stateParams : $location.search();
-            var type = search.type || $state.params.type;
-            //переписать поиск поля
-            if (search.hasOwnProperty("parent") && search.parent) {
-                var entity_conf = configData.entities.filter(function (item) {
-                    return item.name === type;
-                })[0];
+
+            var search = params;
+            var type = (!!search.type) ? search.type : $state.params.type;
+            var entity_conf = undefined;
+            var entityObjects = configData.entities.filter(function (item) {
+                return (item.name === type);
+            });
+
+            if(entityObjects.length > 1) {
+                entityObjects.forEach(function (item) {
+                    if (item.lang === search.lang) {
+                        entity_conf = item;
+                    }
+                });
+            } else{
+                entity_conf = entityObjects[0];
+            }
+
+            if (search.hasOwnProperty("parent") && !!search.parent) {
                 entityObject[entity_conf.backend.fields.parent] = search.parent;
             }
+
             if(search['if-not-exist'] === 'create'){
-                //написать поиск id
-                entityObject['id'] = search.uid;
-                entityObject['lang'] = search.lang;
+                var id = 'id';
+                var lang = 'lang';
+                if(entity_conf.backend.hasOwnProperty('fields')){
+                    id = !!entity_conf.backend.fields.primaryKey ? entity_conf.backend.fields.primaryKey : id;
+                    lang = !!entity_conf.backend.fields.language ? entity_conf.backend.fields.language : lang;
+                }
+                entityObject[id] = params.uid;
+                entityObject[lang] = search.lang;
             }
-            //console.log(entityObject);
             $timeout(function () {
                 $rootScope.$broadcast("editor:entity_loaded",entityObject);
             },0);
@@ -57,7 +73,6 @@
 
         this.setSourceEntity = function (data) {
             data.editorEntityType = "exist";
-            console.log(data);
             $rootScope.$broadcast("editor:entity_loaded",data);
         };
 
@@ -114,12 +129,6 @@
                 }
             });
             $rootScope.$emit('editor:presave_entity',[entityObject, request]);
-        };
-
-        this.getEntity = function(){
-            return configData.entities.filter(function (item) {
-                return item.name === entityType;
-            })[0];
         };
 
         /* !PUBLIC METHODS */

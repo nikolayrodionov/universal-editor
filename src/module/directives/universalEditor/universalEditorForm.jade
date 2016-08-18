@@ -8,12 +8,13 @@ ul.nav.nav-tabs(data-ng-if="vm.menu.length > 1")
          .nav.nav-tabs
             li(data-ng-repeat="(tkey,tab) in vm.tabs", data-ng-class="vm.currentTab == tab.label ? 'active' : ''", data-ng-click="vm.currentTab = tab.label")
                a(href="") {{tab.label}}
-            select(
-            data-ng-options="lang for lang in vm.langs",
-            data-ng-model="vm.langSelect",
-            data-ng-change="vm.setLanguageForm()",
-            data-ng-if="vm.langs.length"
-            )
+         .dropdown.dropdown-form(data-ng-if="vm.menuLangList.length > 0")
+            button.btn.btn-default.dropdown-toggle(data-toggle="dropdown") {{vm.lang}}
+            ul.dropdown-menu
+               li(data-ng-repeat='itemMenu in vm.menuLangList track by $index', data-ng-if='vm.isDropdownForm')
+                  a(data-ui-sref='editor.type.new({lang: itemMenu.label})', ui-sref-opts="{reload: true}") {{itemMenu.label}}
+               li(data-ng-repeat='itemMenu in vm.menuLangList track by $index', data-ng-if='!vm.isDropdownForm')
+                  a(data-ui-sref='editor.type.entity({lang: itemMenu.label, "if-not-exist": "create"})', ui-sref-opts="{reload: true}") {{itemMenu.label}}
          .tab-content-wrapper
             .tab-item-content(data-ng-repeat="(tkey,tab) in vm.tabs" data-ng-show="vm.currentTab == tab.label")
                .field-content-wrapper

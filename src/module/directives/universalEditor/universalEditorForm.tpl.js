@@ -16,7 +16,13 @@ module.run(['$templateCache', function($templateCache) {
     '            <div data-ng-click="vm.closeButton()" ng-style="{\'background-image\':\'url(\'+ vm.assetsPath +\'/images/close.jpg)\'}" class="close-editor"></div>\n' +
     '            <div class="nav nav-tabs">\n' +
     '                <li data-ng-repeat="(tkey,tab) in vm.tabs" data-ng-class="vm.currentTab == tab.label ? \'active\' : \'\'" data-ng-click="vm.currentTab = tab.label"><a href="">{{tab.label}}</a></li>\n' +
-    '                <select data-ng-options="lang for lang in vm.langs" data-ng-model="vm.langSelect" data-ng-change="vm.setLanguageForm()" data-ng-if="vm.langs.length"></select>\n' +
+    '            </div>\n' +
+    '            <div data-ng-if="vm.menuLangList.length &gt; 0" class="dropdown dropdown-form">\n' +
+    '                <button data-toggle="dropdown" class="btn btn-default dropdown-toggle">{{vm.lang}}</button>\n' +
+    '                <ul class="dropdown-menu">\n' +
+    '                    <li data-ng-repeat="itemMenu in vm.menuLangList track by $index" data-ng-if="vm.isDropdownForm"><a data-ui-sref="editor.type.new({lang: itemMenu.label})" ui-sref-opts="{reload: true}">{{itemMenu.label}}</a></li>\n' +
+    '                    <li data-ng-repeat="itemMenu in vm.menuLangList track by $index" data-ng-if="!vm.isDropdownForm"><a data-ui-sref="editor.type.entity({lang: itemMenu.label, &quot;if-not-exist&quot;: &quot;create&quot;})" ui-sref-opts="{reload: true}">{{itemMenu.label}}</a></li>\n' +
+    '                </ul>\n' +
     '            </div>\n' +
     '            <div class="tab-content-wrapper">\n' +
     '                <div data-ng-repeat="(tkey,tab) in vm.tabs" data-ng-show="vm.currentTab == tab.label" class="tab-item-content">\n' +

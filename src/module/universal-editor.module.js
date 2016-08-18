@@ -195,7 +195,7 @@
                 templateUrl : "module/directives/universalEditor/universalEditorForm.html",
                 onEnter : ["RestApiService","EditEntityStorage", "$stateParams",function (RestApiService, EditEntityStorage, $stateParams) {
                     RestApiService.setEntityType($stateParams.type, $stateParams.lang);
-                    EditEntityStorage.createNewEntity();
+                    EditEntityStorage.createNewEntity($stateParams);
                 }]
             })
             .state('editor.type.entity',{
@@ -203,11 +203,7 @@
                 templateUrl : "module/directives/universalEditor/universalEditorForm.html",
                 onEnter : ["RestApiService","EditEntityStorage", "$rootScope", "$stateParams", function (RestApiService,EditEntityStorage, $rootScope,$stateParams) {
                     RestApiService.setEntityType($stateParams.type, $stateParams.lang);
-                    if($stateParams['if-not-exist'] === 'create'){
-                        EditEntityStorage.createNewEntity('create', $stateParams);
-                    } else{
-                        RestApiService.getItemById($stateParams.uid);
-                    }
+                    RestApiService.getItemById($stateParams.uid);
                 }]
             });
         /* DATE INPUT DECORATOR*/

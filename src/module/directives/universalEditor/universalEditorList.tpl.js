@@ -26,8 +26,12 @@ module.run(['$templateCache', function($templateCache) {
     '                <div data-ng-if="button.type == \'targetBlank\'" data-editor-button-target-blank="" data-item-value="item" data-button-label="{{button.label}}" data-button-request="{{button.request}}" data-index="{{$index}}" data-button-class="header"></div>\n' +
     '                <div data-ng-if="button.type == \'download\'" data-editor-button-download="" data-item-value="item" data-button-label="{{button.label}}" data-button-request="{{button.request}}" data-index="{{$index}}" data-button-class="header"></div>\n' +
     '            </div>\n' +
-    '            <!--.form-group.select-language-->\n' +
-    '            <select data-ng-options="lang for lang in vm.langs" data-ng-model="vm.langSelect" data-ng-change="vm.setLanguageList()" data-ng-if="vm.langs.length"></select>\n' +
+    '            <div data-ng-if="vm.menuLangList.length &gt; 0" class="dropdown header-action-button">\n' +
+    '                <button data-toggle="dropdown" class="btn btn-default dropdown-toggle">{{vm.lang}}</button>\n' +
+    '                <ul class="dropdown-menu">\n' +
+    '                    <li data-ng-repeat="itemMenu in vm.menuLangList track by $index"><a data-ui-sref="editor.type.list({lang: itemMenu.label})" ui-sref-opts="{reload: true}">{{itemMenu.label}}</a></li>\n' +
+    '                </ul>\n' +
+    '            </div>\n' +
     '        </div>\n' +
     '        <div data-ng-hide="vm.visibleFilter || (vm.entityLoaded || vm.loadingData)" class="editor-filter">\n' +
     '            <div ng-keyup="vm.clickEnter($event)" class="editor-filter-wrapper">\n' +

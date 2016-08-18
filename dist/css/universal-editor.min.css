@@ -23,6 +23,9 @@
 body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;background-color:#e1e9eb}
 .universal-editor .editor-header{padding:20px 0 5px 0}.universal-editor .editor-header .filter-button{min-width:110px;margin-right:10px}
 .universal-editor .editor-header .header-action-button{border:0;display:inline-block;margin-right:10px;outline:0}
+.universal-editor .editor-header .header-action-button.dropdown{float:right;margin-right:30px}
+.universal-editor .editor-header .header-action-button.dropdown .dropdown-menu{min-width:60px}
+.universal-editor .dropdown.dropdown-form{position:absolute;top:22px;right:66px}.universal-editor .dropdown.dropdown-form .dropdown-menu{min-width:60px}
 .universal-editor .groups-action{margin-bottom:10px}.universal-editor .select-language{display:inline-block}
 .universal-editor .editor-entity-actions{background:#ebf1f3;padding:10px;border-top:1px solid #e1e9eb}
 .universal-editor .editor-filter{margin-bottom:10px;border-bottom:1px solid #9ca9ae;background:#cbd6da;-webkit-border-radius:0 3px 3px;border-radius:0 3px 3px;padding:10px;min-width:600px;display:inline-block;width:auto}

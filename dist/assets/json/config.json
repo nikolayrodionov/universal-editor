@@ -1,15 +1,14 @@
 {
   "entities": [
     {
-      "name": "news123",
-      "label": "Новости123",
+      "name": "news",
+      "label": "Новости 123",
       "backend": {
-        "url": "http://universal-backend.dev/rest/v1/news",
+        "url": "http://universal-backend.dev/rest/v1/news?lang=ru",
         "sortBy": "-id",
         "fields": {
           "primaryKey": "id",
-          "parent": "parent_id",
-          "language": "lang"
+          "parent": "parent_id"
         }
       },
       "tabs": [
@@ -24,6 +23,51 @@
               "values": {
                 "1": ""
               }
+            },
+            {
+              "name": "published_at",
+              "type": "datetime",
+              "list": true,
+              "label": "Дата публикации"
+            },
+            {
+              "name": "category_id",
+              "type": "select",
+              "label": "Категория",
+              "list": true,
+              "filterable": true,
+              "valuesRemote": {
+                "fields": {
+                  "value": "id",
+                  "label": "title"
+                },
+                "url": "http://universal-backend.dev/rest/v1/news/category"
+              },
+              "search": true,
+              "tree": {
+                "parentField": "parent_id",
+                "childCountField": "child_count",
+                "selectBranches": true
+              }
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "list": true,
+              "label": "Заголовок",
+              "required": true
+            },
+            {
+              "name": "description",
+              "type": "textarea",
+              "list": true,
+              "label": "Краткое описание",
+              "required": true
+            },
+            {
+              "name": "text",
+              "type": "wysiwyg",
+              "label": "Текст"
             }
           ]
         },
@@ -223,6 +267,10 @@
           "label": "Применить"
         },
         {
+          "type": "add",
+          "label": "Добавить"
+        },
+        {
           "type": "delete",
           "label": "Удалить"
         }
@@ -249,15 +297,13 @@
               "name": "id",
               "type": "string",
               "list": true,
-              "label": "id",
-              "required": true
+              "label": "id"
             },
             {
               "name": "lang",
               "type": "string",
               "list": true,
-              "label": "Язык",
-              "required": true
+              "label": "Язык"
             },
             {
               "name": "published",
@@ -371,6 +417,10 @@
         {
           "type": "presave",
           "label": "Применить"
+        },
+        {
+          "type": "add",
+          "label": "Добавить"
         },
         {
           "type": "delete",

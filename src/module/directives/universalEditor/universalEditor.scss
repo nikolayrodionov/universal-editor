@@ -17,9 +17,25 @@ body {
       display: inline-block;
       margin-right: 10px;
       outline: none;
+
+      &.dropdown{
+        float: right;
+        margin-right: 30px;
+
+        .dropdown-menu{
+          min-width: 60px;
+        }
+      }
     }
   }
-
+  .dropdown.dropdown-form{
+    position: absolute;
+    top: 22px;
+    right: 66px;
+    .dropdown-menu{
+      min-width: 60px;
+    }
+  }
   .groups-action {
       margin-bottom: 10px;
   }
