@@ -229,9 +229,20 @@
         };
 
         vm.toggleContextView = function (id) {
+            vm.styleContextMenu = {};
             if(vm.contextId == id){
                 vm.contextId = undefined;
             } else {
+                vm.contextId = id;
+            }
+        };
+
+        vm.toggleContextViewByEvent = function(id, event){
+            if(event.which === 3){
+                vm.styleContextMenu = {
+                    'top': event.offsetY,
+                    'left': event.pageX
+                };
                 vm.contextId = id;
             }
         };
@@ -482,7 +493,7 @@
         });
 
         $document.on('click', function (evt) {
-            if(!angular.element(evt.target).hasClass("context-toggle")){
+            if(!angular.element(evt.target).hasClass('context-toggle')){
                 $timeout(function () {
                     vm.contextId = undefined;
                 },0);

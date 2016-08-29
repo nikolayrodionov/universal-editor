@@ -50,9 +50,9 @@ module.run(['$templateCache', function($templateCache) {
     '                </tr>\n' +
     '            </thead>\n' +
     '            <tbody data-ng-if="vm.listLoaded">\n' +
-    '                <tr data-ng-repeat="item in vm.items" data-ng-class="{\'zhs-item\' : (vm.entityType !== item[vm.subType]) &amp;&amp; item[vm.subType] !== undefined}">\n' +
+    '                <tr data-ng-repeat="item in vm.items" data-ng-class="{\'zhs-item\' : (vm.entityType !== item[vm.subType]) &amp;&amp; item[vm.subType] !== undefined}" data-ng-mousedown="vm.toggleContextViewByEvent(item[vm.idField], $event)" oncontextmenu="return false;" class="context-toggle-element">\n' +
     '                    <td class="context-column"><span data-ng-click="vm.toggleContextView(item[vm.idField])" data-ng-show="vm.contextLinks.length" class="context-toggle">Toggle buttons</span>\n' +
-    '                        <div data-ng-show="vm.contextId == item[vm.idField]" class="context-menu-wrapper">\n' +
+    '                        <div data-ng-show="vm.contextId == item[vm.idField]" data-ng-style="vm.styleContextMenu" class="context-menu-wrapper">\n' +
     '                            <div data-ng-repeat="link in vm.contextLinks track by $index" data-ng-if="(item[vm.subType] == vm.entityType || item[vm.subType] == undefined)" class="context-menu-item">\n' +
     '                                <div data-ng-if="link.type == \'request\'" data-ng-click="vm.contextAction(link,item[vm.idField])">{{link.label}}</div>\n' +
     '                                <div data-ng-if="link.type == \'edit\'" data-editor-button-edit="" data-entity-subtype="{{item[vm.subType]}}" data-entity-id="{{item[vm.idField]}}" data-button-label="{{link.label}}" data-button-request="{{link.request}}"></div>\n' +
