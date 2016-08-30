@@ -493,7 +493,8 @@
         });
 
         $document.on('click', function (evt) {
-            if(!angular.element(evt.target).hasClass('context-toggle')){
+            if(!angular.element(evt.target).hasClass('context-toggle')
+                && ((evt.which !== 3) || (angular.element(evt.target).parents('.context-toggle-element').length === 0))){
                 $timeout(function () {
                     vm.contextId = undefined;
                 },0);
