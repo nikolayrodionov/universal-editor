@@ -665,5 +665,21 @@
             }
             return mixMode;
         };
+
+        this.getParentMixModeByEntity = function() {
+            var mixMode = {};
+            mixMode.existence = false;
+            if(configData.hasOwnProperty("mixedMode")){
+                angular.forEach(configData.mixedMode, function(item){
+                    if(item.entities[1] == entityType) {
+                        mixMode.existence = true;
+                        mixMode.entity = item.entities[0];
+                        mixMode.entityTypeName = item.fields.type;
+                        mixMode.prependIcon = item.fields.prependIcon;
+                    }
+                });
+            }
+            return mixMode;
+        };
     }
 })();

@@ -3,11 +3,11 @@
 
     angular
         .module('universal.editor')
-        .controller('UniversalEditorController',UniversalEditorController);
+        .controller('UniversalEditorController', UniversalEditorController);
 
-    UniversalEditorController.$inject = ['$scope','$rootScope','configData','RestApiService','FilterFieldsStorage','$location','$document','$timeout','$httpParamSerializer','$state','configObject','toastr', '$translate', 'ConfigDataProvider'];
+    UniversalEditorController.$inject = ['$scope', '$rootScope', 'configData', 'RestApiService', 'FilterFieldsStorage', '$location', '$document', '$timeout', '$httpParamSerializer', '$state', 'configObject', 'toastr', '$translate', 'ConfigDataProvider'];
 
-    function UniversalEditorController($scope,$rootScope,configData,RestApiService,FilterFieldsStorage,$location,$document,$timeout,$httpParamSerializer,$state,configObject,toastr, $translate, ConfigDataProvider){
+    function UniversalEditorController($scope, $rootScope, configData, RestApiService, FilterFieldsStorage, $location, $document, $timeout, $httpParamSerializer, $state, configObject, toastr, $translate, ConfigDataProvider) {
         $scope.entity = RestApiService.getEntityType();
         var entityObject = RestApiService.getEntityObject();
         /* jshint validthis: true */
@@ -20,7 +20,7 @@
         tinyMCE.baseURL = '../assets/mce-files';
         vm.assetsPath = '../assets';
 
-        if ($scope.entity === undefined || angular.isUndefined(entityObject)){
+        if ($scope.entity === undefined || angular.isUndefined(entityObject)) {
             console.error("Editor: Сущность с типом \"" + $scope.entity + "\" не описана в конфигурационном файле");
             return;
         }
@@ -54,14 +54,16 @@
         vm.pagination = entityObject.backend.hasOwnProperty("pagination") ? entityObject.backend.pagination : true;
         vm.autoCompleteFields = [];
         vm.entityType = $scope.entity;
+        vm.menu = [];
 
-        if(entityObject.backend.hasOwnProperty('fields')){
+        if (entityObject.backend.hasOwnProperty('fields')) {
             vm.idField = entityObject.backend.fields.primaryKey || vm.idField;
         }
 
         var mixEntity = RestApiService.getMixModeByEntity();
+
         vm.isMixMode = mixEntity.existence;
-        if(mixEntity.existence){
+        if (mixEntity.existence) {
             vm.prependIcon = mixEntity.prependIcon || 'title';
             vm.subType = mixEntity.entityTypeName || "type";
             vm.mixEntityType = mixEntity.entity;
@@ -71,6 +73,21 @@
             vm.mixedListHeaderBar = mixEntityObject.listHeaderBar;
             vm.mixContextLinks = mixEntityObject.contextMenu;
         }
+
+        var parentEntity = RestApiService.getParentMixModeByEntity();
+
+        angular.forEach(vm.configData.entities, function(value) {
+            if (!!value.label) {
+                var itemMenu = {};
+                itemMenu.label = value.label;
+                itemMenu.name = value.name;
+                if (value.name == vm.entityType || (!entityObject.label && parentEntity.existence &&  value.name == parentEntity.entity)) {
+                    itemMenu.isActiv = true
+                }
+                vm.menu.push(itemMenu);
+            }
+        });
+
         vm.metaKey = false;
         metaKey = "_meta";
         itemsKey = "items";
@@ -81,16 +98,16 @@
                     vm.autoCompleteFields.push(field);
                 }
 
-                if(field.hasOwnProperty("list") && field.list === true){
+                if (field.hasOwnProperty("list") && field.list === true) {
                     vm.tableFields.push({
-                        field : field.name,
-                        displayName : field.label || field.name
+                        field: field.name,
+                        displayName: field.label || field.name
                     });
                 }
             });
         });
         angular.forEach(entityObject.editFooterBar, function (editFooterBar) {
-            switch (editFooterBar.type){
+            switch (editFooterBar.type) {
                 case 'add':
                     vm.editFooterBarNew.push(editFooterBar);
                     break;
@@ -119,26 +136,26 @@
             }
         });
 
-        if(mixEntity.existence){
-          angular.forEach(mixEntityObject.tabs, function (tab) {
-              angular.forEach(tab.fields, function (field) {
-                  if(field.hasOwnProperty("list") && field.list === true && !isInTableFields(field.name) ){
-                      vm.tableFields.push({
-                          field : field.name,
-                          displayName : field.label || field.name
-                      });
-                  }
-              });
-          });
+        if (mixEntity.existence) {
+            angular.forEach(mixEntityObject.tabs, function (tab) {
+                angular.forEach(tab.fields, function (field) {
+                    if (field.hasOwnProperty("list") && field.list === true && !isInTableFields(field.name)) {
+                        vm.tableFields.push({
+                            field: field.name,
+                            displayName: field.label || field.name
+                        });
+                    }
+                });
+            });
         }
 
         vm.sortField = entityObject.backend.sortBy || vm.tableFields[0].field;
 
-        angular.forEach(vm.tabs, function (tab,ind) {
-            if(tab.fields.length > 0){
+        angular.forEach(vm.tabs, function (tab, ind) {
+            if (tab.fields.length > 0) {
                 vm.tabsVisibility.push(tab.fields[0].name);
-                angular.forEach(tab.fields,function(field){
-                    if(field.hasOwnProperty("filterable") && field.filterable === false) {
+                angular.forEach(tab.fields, function (field) {
+                    if (field.hasOwnProperty("filterable") && field.filterable === false) {
                         // ;)
                     } else {
                         vm.filterFields.push(field);
@@ -148,13 +165,13 @@
                 vm.tabsVisibility.push("");
             }
         });
-        
 
-        vm.getScope = function(){
+
+        vm.getScope = function () {
             return $scope;
         };
 
-        vm.setTabVisible = function (index,value) {
+        vm.setTabVisible = function (index, value) {
             vm.tabsVisibility[index] = value;
         };
 
@@ -170,16 +187,13 @@
             vm.listLoaded = false;
 
             var params = {};
-            var isReload = false;
-            if($state.params.back){ 
-                params.back = $state.params.back;
+            if ($state.params.back) {
+                params.type = $state.params.back;
             }
-            if($state.params.parent){ 
+            if ($state.params.parent) {
                 params.parent = $state.params.parent;
-                isReload = false;
             }
-            RestApiService.getItemsList();
-            $state.go('editor.type.list', params, {reload: isReload});
+            $state.go('editor.type.list', params, {reload: true});
         };
 
         vm.applyFilter = function () {
@@ -194,7 +208,7 @@
                 RestApiService.getItemsList();
             }
         };
-        
+
 
         if (!RestApiService.isProcessing) {
             vm.clearFilter();
@@ -209,27 +223,27 @@
 
         vm.changeSortField = function (field) {
             vm.listLoaded = false;
-            if(vm.sortField == field){
+            if (vm.sortField == field) {
                 vm.sortingDirection = !vm.sortingDirection;
             } else {
                 vm.sortField = field;
             }
 
             var sortingParam = {
-                sort : vm.sortingDirection ? field : "-" + field
+                sort: vm.sortingDirection ? field : "-" + field
             };
 
             RestApiService.getItemsList({
-                sort : vm.sortingDirection ? field : "-" + field
+                sort: vm.sortingDirection ? field : "-" + field
             });
         };
 
-        vm.contextAction = function (button,id) {
-            RestApiService.contextMenuAction(button,id);
+        vm.contextAction = function (button, id) {
+            RestApiService.contextMenuAction(button, id);
         };
 
         vm.toggleContextView = function (id) {
-            if(vm.contextId == id){
+            if (vm.contextId == id) {
                 vm.contextId = undefined;
             } else {
                 vm.contextId = id;
@@ -241,16 +255,16 @@
         };
 
         vm.toggleFilterVisibility = function () {
-            if(!vm.entityLoaded){
+            if (!vm.entityLoaded) {
                 vm.visibleFilter = !vm.visibleFilter;
             }
         };
 
         RestApiService.setQueryParams({
-            sort : vm.sortingDirection ? vm.sortField : "-" + vm.sortField
+            sort: vm.sortingDirection ? vm.sortField : "-" + vm.sortField
         });
 
-        $rootScope.$broadcast('editor:set_entity_type',$scope.entity);
+        $rootScope.$broadcast('editor:set_entity_type', $scope.entity);
 
 
         $scope.$on('editor:items_list', function (event, data) {
@@ -281,7 +295,9 @@
                         var val = item[fieldForEdit];
                         item[fieldForEdit + "_copy"] = val;
                         item[fieldForEdit] = "";
-                        if (val && ids.indexOf(val) === -1) { ids.push(val); }
+                        if (val && ids.indexOf(val) === -1) {
+                            ids.push(val);
+                        }
                     });
 
                     if (ids.length) {
@@ -322,59 +338,59 @@
             var endIndex;
             var qParams = RestApiService.getQueryParams();
             // PAGINATION
-            if(vm.items.length === 0){
+            if (vm.items.length === 0) {
                 vm.metaKey = false;
             }
-            if(vm.pagination && vm.metaKey){
+            if (vm.pagination && vm.metaKey) {
 
                 vm.metaData = data[metaKey];
                 vm.metaData.fromItem = ((data[metaKey].currentPage - 1) * data[metaKey].perPage ) + 1;
                 vm.metaData.toItem = ((data[metaKey].currentPage - 1) * data[metaKey].perPage ) + data[itemsKey].length;
 
-                if(data[metaKey].currentPage > 1){
+                if (data[metaKey].currentPage > 1) {
                     qParams.page = 1;
                     vm.pageItemsArray.push({
-                        label : "<<",
-                        href : entityObject.backend.url + "?" + $httpParamSerializer(qParams)
+                        label: "<<",
+                        href: entityObject.backend.url + "?" + $httpParamSerializer(qParams)
                     });
 
                     qParams.page = data[metaKey].currentPage - 1;
                     vm.pageItemsArray.push({
-                        label : "<",
-                        href : entityObject.backend.url + "?" + $httpParamSerializer(qParams)
+                        label: "<",
+                        href: entityObject.backend.url + "?" + $httpParamSerializer(qParams)
                     });
                 }
 
-                if(data[metaKey].currentPage > pageItems + 1){
+                if (data[metaKey].currentPage > pageItems + 1) {
                     qParams.page = data[metaKey].currentPage - pageItems - 1;
                     vm.pageItemsArray.push({
-                        label : "...",
-                        href : entityObject.backend.url + "?" + $httpParamSerializer(qParams)
+                        label: "...",
+                        href: entityObject.backend.url + "?" + $httpParamSerializer(qParams)
                     });
                 }
 
-                if( data[metaKey].currentPage - pageItems > 0){
+                if (data[metaKey].currentPage - pageItems > 0) {
                     startIndex = data[metaKey].currentPage - pageItems;
                 } else {
                     startIndex = 1;
                 }
 
-                while(startIndex < data[metaKey].currentPage){
+                while (startIndex < data[metaKey].currentPage) {
                     qParams.page = startIndex;
                     vm.pageItemsArray.push({
-                        label : startIndex,
-                        href : entityObject.backend.url + "?" + $httpParamSerializer(qParams)
+                        label: startIndex,
+                        href: entityObject.backend.url + "?" + $httpParamSerializer(qParams)
                     });
 
                     startIndex++;
                 }
 
                 vm.pageItemsArray.push({
-                    label : data[metaKey].currentPage,
-                    self : true
+                    label: data[metaKey].currentPage,
+                    self: true
                 });
 
-                if( data[metaKey].currentPage + pageItems < data[metaKey].pageCount){
+                if (data[metaKey].currentPage + pageItems < data[metaKey].pageCount) {
                     endIndex = data[metaKey].currentPage + pageItems;
                 } else {
                     endIndex = data[metaKey].pageCount;
@@ -382,35 +398,35 @@
 
                 var tempCurrentPage = data[metaKey].currentPage + 1;
 
-                while(tempCurrentPage <= endIndex){
+                while (tempCurrentPage <= endIndex) {
                     qParams.page = tempCurrentPage;
                     vm.pageItemsArray.push({
-                        label : tempCurrentPage,
-                        href : entityObject.backend.url + "?" + $httpParamSerializer(qParams)
+                        label: tempCurrentPage,
+                        href: entityObject.backend.url + "?" + $httpParamSerializer(qParams)
                     });
 
                     tempCurrentPage++;
                 }
 
-                if(data[metaKey].currentPage + pageItems < data[metaKey].pageCount){
+                if (data[metaKey].currentPage + pageItems < data[metaKey].pageCount) {
                     qParams.page = data[metaKey].currentPage + pageItems + 1;
                     vm.pageItemsArray.push({
-                        label : "...",
-                        href : entityObject.backend.url + "?" + $httpParamSerializer(qParams)
+                        label: "...",
+                        href: entityObject.backend.url + "?" + $httpParamSerializer(qParams)
                     });
                 }
 
-                if(data[metaKey].currentPage < data[metaKey].pageCount){
+                if (data[metaKey].currentPage < data[metaKey].pageCount) {
                     qParams.page = data[metaKey].currentPage + 1;
                     vm.pageItemsArray.push({
-                        label : ">",
-                        href : entityObject.backend.url + "?" + $httpParamSerializer(qParams)
+                        label: ">",
+                        href: entityObject.backend.url + "?" + $httpParamSerializer(qParams)
                     });
 
                     qParams.page = data[metaKey].pageCount;
                     vm.pageItemsArray.push({
-                        label : ">>",
-                        href : entityObject.backend.url + "?" + $httpParamSerializer(qParams)
+                        label: ">>",
+                        href: entityObject.backend.url + "?" + $httpParamSerializer(qParams)
                     });
                 }
             }
@@ -418,17 +434,17 @@
             //END PAGINATION
         });
 
-        $scope.$on('editor:entity_loaded', function (event,data) {
+        $scope.$on('editor:entity_loaded', function (event, data) {
             vm.editorEntityType = data.editorEntityType;
             vm.entityId = data[vm.idField];
             vm.entityLoaded = true;
         });
 
-        $scope.$on('editor:server_error', function (event,data) {
+        $scope.$on('editor:server_error', function (event, data) {
             vm.errors.push(data);
         });
 
-        $scope.$on('editor:presave_entity_created', function (event,data) {
+        $scope.$on('editor:presave_entity_created', function (event, data) {
             $translate('CHANGE_RECORDS.CREATE').then(function (translation) {
                 toastr.success(translation);
             });
@@ -436,24 +452,24 @@
             vm.editorEntityType = "exist";
         });
 
-        $scope.$on('editor:presave_entity_updated', function (event,data) {
+        $scope.$on('editor:presave_entity_updated', function (event, data) {
             $translate('CHANGE_RECORDS.UPDATE').then(function (translation) {
                 toastr.success(translation);
             });
         });
 
-        $scope.$on('editor:parent_childs', function (event,data) {
-            angular.forEach(vm.items,function (item,ind){
+        $scope.$on('editor:parent_childs', function (event, data) {
+            angular.forEach(vm.items, function (item, ind) {
 
-              var startInd = 1;
-                if(item[vm.idField] === data.id){
-                    if(item.isExpand === true){
+                var startInd = 1;
+                if (item[vm.idField] === data.id) {
+                    if (item.isExpand === true) {
                         item.isExpand = false;
-                        vm.items.splice(ind + 1,data.childs.length);
+                        vm.items.splice(ind + 1, data.childs.length);
                     } else {
                         item.isExpand = true;
-                        angular.forEach(data.childs,function (newItem) {
-                            if(vm.items[ind].hasOwnProperty.parentPadding){
+                        angular.forEach(data.childs, function (newItem) {
+                            if (vm.items[ind].hasOwnProperty.parentPadding) {
                                 newItem.parentPadding = vm.items[ind].parentPadding + 1;
                             } else {
                                 newItem.parentPadding = 1;
@@ -466,26 +482,26 @@
             });
         });
 
-        $scope.$on('editor:entity_success_deleted', function (event,data) {
+        $scope.$on('editor:entity_success_deleted', function (event, data) {
             $translate('CHANGE_RECORDS.DELETE').then(function (translation) {
                 toastr.success(translation);
             });
         });
 
-        $scope.$on('editor:field_error', function (event,data) {
+        $scope.$on('editor:field_error', function (event, data) {
             vm.errors.push(data);
         });
 
-        $scope.$on('editor:request_start', function (event,data) {
+        $scope.$on('editor:request_start', function (event, data) {
             vm.errors = [];
             vm.notifys = [];
         });
 
         $document.on('click', function (evt) {
-            if(!angular.element(evt.target).hasClass("context-toggle")){
+            if (!angular.element(evt.target).hasClass("context-toggle")) {
                 $timeout(function () {
                     vm.contextId = undefined;
-                },0);
+                }, 0);
             }
         });
 
@@ -495,24 +511,24 @@
             vm.loadingData = processingStatus;
         });
         function isInTableFields(name) {
-          var index = vm.tableFields.findIndex(function(field) {
-            return field.field === name;
-          });
+            var index = vm.tableFields.findIndex(function (field) {
+                return field.field === name;
+            });
 
-          return (index !== -1) ? true : false;
+            return (index !== -1) ? true : false;
         }
 
         //локализация
-        if(configData.hasOwnProperty("ui") &&  configData.ui.hasOwnProperty("language")) {
-            if(configData.ui.language.search(".json") !== (-1)){
+        if (configData.hasOwnProperty("ui") && configData.ui.hasOwnProperty("language")) {
+            if (configData.ui.language.search(".json") !== (-1)) {
                 $translate.use(configData.ui.language);
-            } else if(configData.ui.language !== 'ru') {
+            } else if (configData.ui.language !== 'ru') {
                 $translate.use('assets/json/language/' + configData.ui.language + '.json');
             }
         }
 
-        vm.clickEnter = function(event){
-            if(event.keyCode === 13){
+        vm.clickEnter = function (event) {
+            if (event.keyCode === 13) {
                 vm.applyFilter();
             }
         }
